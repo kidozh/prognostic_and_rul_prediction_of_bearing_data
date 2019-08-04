@@ -21,4 +21,4 @@ This is the project of hybrid prediction based on deep learning technology.
 
 ## LICENCE
 
-Project is copyrighted MIT, and XJTU Bearing data is copyrighted by [Biao Wang of Xi'an Jiaotong University](http://biaowang.tech/xjtu-sy-bearing-datasets/)
+Project is licensed [MIT](./LICENSE), and XJTU Bearing data is copyrighted by [Biao Wang of Xi'an Jiaotong University](http://biaowang.tech/xjtu-sy-bearing-datasets/)
