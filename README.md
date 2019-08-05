@@ -14,6 +14,11 @@ This is the project of hybrid prediction based on deep learning technology.
 + Transfer learning appliance
 + Digital twins by Deep Conditional Generative Adversarial Neural Network(DCGAN) 
 
+## Achievements
+| Type | Value on Train set | Value on Test set | 
+|----|----|----|
+| Classification Accuracy(~60 epoch) | ~90% | ~62% |
+
 ## Current difficulty
 
 + accuracy is not guaranteed

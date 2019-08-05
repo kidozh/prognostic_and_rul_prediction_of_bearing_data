@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-
+from keras.utils import to_categorical
 # from keras.utils import to_categorical
 
 XJTU_DATA_PATH = r"E:\IDM_download\XJTU-SY_Bearing_Datasets"
@@ -30,11 +30,11 @@ class dataSet(object):
     trainTestDist = [
         [1, 0, 1, 1, 1],
         [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 0]
+        [1, 1, 1, 0, 0]
     ]
     # indicates alert 30 minutes ago
     alertTime = 30
-    maxSampleTime = 100
+    maxSampleTime = 300
     # cache configuration
     CACHE_DIR = "./cache"
     TRAIN_DATA_CACHE_NAME = "TRAIN_DATA"
@@ -96,6 +96,10 @@ class dataSet(object):
             print("# TOUCH condition folder :", CONDITION_DATA_FOLDER_LIST[conditionIdx])
             conditionFolderPath = os.path.join(XJTU_DATA_PATH, CONDITION_DATA_FOLDER_LIST[conditionIdx])
             for subSampleVal in range(1, 6):
+                if (conditionVal == 1 and subSampleVal == 5) or (conditionVal == 3 and subSampleVal == 2):
+                    print("Skip example condition",conditionVal,subSampleVal)
+                    continue
+
                 print("! TOUCH sample folder ", "Bearing%d_%d" % (conditionVal, subSampleVal))
                 subSampleIdx = subSampleVal - 1
                 bearingSampleFolderPath = os.path.join(conditionFolderPath,
@@ -105,11 +109,12 @@ class dataSet(object):
                 fault_label = FAULT_LABEL[conditionIdx][subSampleIdx]
                 condition_label = MACHINING_PARAMETER_LABEL[conditionIdx]
                 if isinstance(fault_label, int):
-                    one_hot_fault_label = [0 for _ in range(5)]
-                    one_hot_fault_label[fault_label] = 1
-                    # one_hot_fault_label = to_categorical(fault_label, num_classes=5)
+                    # one_hot_fault_label = [0 for _ in range(5)]
+                    # one_hot_fault_label[fault_label] = 1
+                    one_hot_fault_label = to_categorical(fault_label, num_classes=4)
                 elif isinstance(fault_label, list):
-                    one_hot_fault_label = [0 for _ in range(5)]
+                    raise TypeError("We skip the multi-label sample, it should not be list type")
+                    one_hot_fault_label = [0 for _ in range(4)]
                     for i in fault_label:
                         one_hot_fault_label[i] = 1
                 else:
@@ -122,6 +127,7 @@ class dataSet(object):
                     startMinute = endMinutes - self.maxSampleTime
                 # add sample to data set
                 for i in range(startMinute, endMinutes + 1):
+
                     print("@ SCANNING CSV ", conditionVal, subSampleVal, "%d.csv" % (i))
                     sampleCSVPath = os.path.join(bearingSampleFolderPath, "%d.csv" % (i))
                     np_data = self.read_signal_file_to_array_by_path(sampleCSVPath)
@@ -138,11 +144,15 @@ class dataSet(object):
                                 train_rul_minutes.append(endMinutes - i)
                                 train_condition_labels.append(condition_label)
                         else:
-                            for reinforce_sample in reinforce_data:
-                                train_data.append(reinforce_sample)
-                                train_alert_labels.append([1, 0, 0, 0, 0])
-                                train_rul_minutes.append(endMinutes - i)
-                                train_condition_labels.append(condition_label)
+                            train_data.append(np_data)
+                            train_alert_labels.append([1, 0, 0, 0])
+                            train_rul_minutes.append(endMinutes - i)
+                            train_condition_labels.append(condition_label)
+                            # for reinforce_sample in reinforce_data:
+                            #     train_data.append(reinforce_sample)
+                            #     train_alert_labels.append([1, 0, 0, 0, 0])
+                            #     train_rul_minutes.append(endMinutes - i)
+                            #     train_condition_labels.append(condition_label)
                     else:
                         if endMinutes - i <= self.alertTime:
                             # it's not normal
@@ -150,7 +160,7 @@ class dataSet(object):
                             test_alert_labels.append(one_hot_fault_label)
                         else:
                             test_data.append(np_data)
-                            test_alert_labels.append([1, 0, 0, 0, 0])
+                            test_alert_labels.append([1, 0, 0, 0])
                         test_condition_labels.append(condition_label)
                         test_rul_minutes.append(endMinutes - i)
                 pass
@@ -187,17 +197,33 @@ class dataSet(object):
 
 
 if __name__ == "__main__":
+
     data = dataSet()
     train_data, train_alert_labels, train_rul_minutes, train_condition, test_data, test_alert_labels, test_rul_minutes, test_condition = data.get_all_cache_data()
     print("Train and test shape", train_data.shape, test_data.shape, train_rul_minutes.shape, train_alert_labels.shape, train_condition.shape)
     # data.get_all_data()
     # np_data = data.read_signal_file_to_array_by_path(
     #     r"E:\IDM_download\XJTU-SY_Bearing_Datasets\35Hz12kN\Bearing1_1\1.csv")
-    # import matplotlib.pyplot as plt
-    #
-    # plt.plot(np_data[:, 0], label="Horizon")
-    # # plt.plot(np_data[:,1],label="Vertical")
-    # plt.xlabel("Time")
-    # plt.ylabel("Signal")
-    # plt.legend()
-    # plt.show()
+    import matplotlib.pyplot as plt
+    import matplotlib
+
+    matplotlib.use("Qt5Agg")
+
+    idList = [0,50,75,100,150]
+    for idx,sampleIdx in enumerate(idList):
+        plt.subplot("%d%d%d"%(len(idList),1,idx+1))
+        plt.plot(train_data[sampleIdx,:,0],label="Horizon_%d"%(sampleIdx))
+        plt.xlabel("Time")
+        plt.ylabel("Signal")
+        plt.legend()
+    plt.show()
+
+
+
+
+    plt.plot(np.argmax(train_alert_labels,axis=1), label="TRAIN_ALERT_LABEL")
+    plt.plot(train_rul_minutes,label="Train RUL")
+    plt.xlabel("Time")
+    plt.ylabel("Signal")
+    plt.legend()
+    plt.show()
