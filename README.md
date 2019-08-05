@@ -10,14 +10,14 @@ This is the project of hybrid prediction based on deep learning technology.
 
 ## TODO
 
-+ classification and regression on XJTU bearing dataset
++ Classification and regression on XJTU bearing dataset
 + Transfer learning appliance
 + Digital twins by Deep Conditional Generative Adversarial Neural Network(DCGAN) 
 
 ## Achievements
 | Type | Value on Train set | Value on Test set | 
 |----|----|----|
-| Classification Accuracy(~60 epoch) | ~90% | ~62% |
+| Classification Accuracy(~60 epoch) | ~99.86% | ~70% |
 
 ## Current difficulty
 

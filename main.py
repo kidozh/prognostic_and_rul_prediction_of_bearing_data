@@ -46,16 +46,17 @@ matplotlib.use("Qt5Agg")
 data = dataSet()
 train_data, train_alert_labels, train_rul_minutes, train_condition, test_data, test_alert_labels, test_rul_minutes, test_condition = data.get_all_cache_data()
 train_rul_minutes = train_rul_minutes.reshape(-1, 1)
+test_rul_minutes = test_rul_minutes.reshape(-1,1)
 
 PREDICT = False
 
-for depth in [20, 15, 10]:
+for depth in [25, 20, 15, 10]:
     log_dir = "logs/"
-    dropout = 0.0
+    dropout = 0.1
     train_name = 'Resnet_block_%s_embedding_%s' % (depth, dropout)
     MODEL_CHECK_PT = "%s.kerascheckpts" % (train_name)
     MODEL_NAME = '%s.kerasmodel' % (train_name)
-    model = build_residual_rcnn(2048, 2, 5, depth, dropout=dropout)
+    model = build_residual_rcnn(2048, 2, 4, depth, dropout=dropout)
     if not PREDICT:
         tb_cb = TensorBoard(log_dir=log_dir + train_name)
         ckp_cb = ModelCheckpoint(MODEL_CHECK_PT, monitor='val_loss', save_weights_only=True, verbose=1,
@@ -63,12 +64,13 @@ for depth in [20, 15, 10]:
         import os.path
 
         if os.path.exists(MODEL_CHECK_PT):
+            print("Load weights successfully")
             model.load_weights(MODEL_CHECK_PT)
 
         print('Model has been established.')
 
         model.fit([train_data,train_condition], [train_alert_labels, train_rul_minutes],
-                  batch_size=64, epochs=10000,
+                  batch_size=16, epochs=10000,
                   callbacks=[tb_cb, ckp_cb],
                   initial_epoch=0,
                   validation_data=([test_data,test_condition], [test_alert_labels, test_rul_minutes]))
@@ -81,13 +83,23 @@ for depth in [20, 15, 10]:
         else:
             raise FileExistsError("No weights found : %s, please train it first" % (MODEL_CHECK_PT))
 
-        test_alert_labels_pred, test_rul_minutes_pred = model.predict(test_data)
-        # plt.figure()
-        # plt.plot(np.argmax(test_alert_labels,axis=1),label="TEST ALERT")
-        # plt.plot(np.argmax(test_alert_labels_pred,axis=1),label="PRED ALERT")
-        # plt.legend()
-        # plt.show()
-        # plt.close()
+        test_alert_labels_pred, test_rul_minutes_pred = model.predict([test_data,test_condition])
+        print(model.evaluate([test_data,test_condition],[test_alert_labels,test_rul_minutes]))
+        plt.figure()
+        plt.plot(np.argmax(test_alert_labels,axis=1),label="TEST ALERT")
+        plt.plot(np.argmax(test_alert_labels_pred,axis=1),'--',label="PRED ALERT")
+        plt.legend()
+        plt.show()
+        plt.close()
+
+        train_alert_labels_pred, train_rul_minutes_pred = model.predict([train_data, train_condition])
+        print(model.evaluate([test_data, test_condition], [test_alert_labels, test_rul_minutes]))
+        plt.figure()
+        plt.plot(np.argmax(train_alert_labels, axis=1), label="TRAIN ALERT")
+        plt.plot(np.argmax(train_alert_labels_pred, axis=1),'--', label="PRED ALERT")
+        plt.legend()
+        plt.show()
+        plt.close()
         from sklearn.metrics import confusion_matrix
 
         print(test_alert_labels_pred.shape, test_alert_labels.shape)
