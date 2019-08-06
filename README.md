@@ -19,10 +19,20 @@ This is the project of hybrid prediction based on deep learning technology.
 |----|----|----|
 | Classification Accuracy(~60 epoch) | ~99.86% | ~70% |
 
-## Confusion matrix
+### Classification result
 
-+ On train data ![Confusion matrix on train data](./train_classification_confusion_matrix.svg)
-+ On test data ![Confusion matrix on test data](./classification_confusion_matrix.svg)
+You can find them in **SVG** file:
+
++ classification_on_train_data.svg
++ classification_on_test_data.svg
+
+Since they are not intuitive, we didn't publish them on **README.md** file.
+
+### Confusion matrix
+
++ On train data <br/> ![Confusion matrix on train data](./train_classification_confusion_matrix.svg)
++ On test data  <br/> ![Confusion matrix on test data](./classification_confusion_matrix.svg)
+
 
 
 ## Current difficulty
