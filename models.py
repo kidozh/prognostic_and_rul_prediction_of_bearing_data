@@ -25,9 +25,13 @@ def residual_block(x, filters: tuple, changeDim: bool, kernel_size=3, pooling_si
 
 def build_residual_rcnn(time_length, input_channel, output_class_num, block_depth, dropout=0.5):
     inp = Input(shape=(time_length, input_channel), name="signal_input")
+    condition_inp = Input(shape=(2,), name="condition_input")
+    condition_embedding = RepeatVector(time_length)((Dense(2, name="condition_embedding")(condition_inp)))
+
+    out = multiply([inp, condition_embedding])
 
 
-    out = Conv1D(16, 7,strides=1,padding="same",kernel_initializer='he_normal',kernel_regularizer=l2(0.01))(inp)
+    out = Conv1D(16, 7,strides=1,padding="same",kernel_initializer='he_normal',kernel_regularizer=l2(0.01))(out)
     out = BatchNormalization()(out)
     out = Activation('relu')(out)
     BASE_DIM = 16
@@ -42,7 +46,7 @@ def build_residual_rcnn(time_length, input_channel, output_class_num, block_dept
 
     # add flatten
     out = Flatten()(out)
-    condition_inp = Input(shape=(2,), name="condition_input")
+
 
     out_class = Dense(output_class_num,activation="softmax",name="dense_class_5")(out)
     out_rul = Dense(1,name="dense_rul")(out)

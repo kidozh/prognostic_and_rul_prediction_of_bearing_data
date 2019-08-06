@@ -48,15 +48,15 @@ train_data, train_alert_labels, train_rul_minutes, train_condition, test_data, t
 train_rul_minutes = train_rul_minutes.reshape(-1, 1)
 test_rul_minutes = test_rul_minutes.reshape(-1,1)
 
-PREDICT = False
+PREDICT = True
 
-import random
-
-index = [i for i in range(train_data.shape[0])]
-random.shuffle(index)
-train_data = train_data[index]
-train_alert_labels = train_alert_labels[index]
-train_condition = train_condition[index]
+# import random
+#
+# index = [i for i in range(train_data.shape[0])]
+# random.shuffle(index)
+# train_data = train_data[index]
+# train_alert_labels = train_alert_labels[index]
+# train_condition = train_condition[index]
 
 for depth in [18,20, 15, 10]:
     log_dir = "logs/"
@@ -80,7 +80,7 @@ for depth in [18,20, 15, 10]:
         model.fit([train_data,train_condition], train_alert_labels,
                   batch_size=32, epochs=10000,
                   callbacks=[tb_cb, ckp_cb],
-                  initial_epoch=0,
+                  initial_epoch=2334,
                   shuffle=True,
                   validation_data=([test_data,test_condition], test_alert_labels))
 
@@ -92,7 +92,7 @@ for depth in [18,20, 15, 10]:
         else:
             raise FileExistsError("No weights found : %s, please train it first" % (MODEL_CHECK_PT))
 
-        test_alert_labels_pred, test_rul_minutes_pred = model.predict([test_data,test_condition])
+        test_alert_labels_pred = model.predict([test_data,test_condition])
         print(model.evaluate([test_data,test_condition],test_alert_labels))
         plt.figure()
         plt.plot(np.argmax(test_alert_labels,axis=1),label="TEST ALERT")
@@ -101,8 +101,8 @@ for depth in [18,20, 15, 10]:
         plt.show()
         plt.close()
 
-        train_alert_labels_pred, train_rul_minutes_pred = model.predict([train_data, train_condition])
-        print(model.evaluate([test_data, test_condition], [test_alert_labels, test_rul_minutes]))
+        train_alert_labels_pred = model.predict([train_data, train_condition])
+        print(model.evaluate([test_data, test_condition], test_alert_labels))
         plt.figure()
         plt.plot(np.argmax(train_alert_labels, axis=1), label="TRAIN ALERT")
         plt.plot(np.argmax(train_alert_labels_pred, axis=1),'--', label="PRED ALERT")
@@ -124,10 +124,10 @@ for depth in [18,20, 15, 10]:
         plt.close()
 
         fig = plt.figure()
-        plt.plot(test_rul_minutes_pred, label="Predicted RUL")
-        plt.plot(test_rul_minutes, label="Real RUL")
-
-        plt.ylabel("Remaining Useful Life (minutes)")
-        plt.xlabel("Sample")
+        trainConfusionMatrix = confusion_matrix(np.argmax(train_alert_labels, axis=1),
+                                           np.argmax(train_alert_labels_pred, axis=1))
+        print(trainConfusionMatrix)
+        plot_confusion_matrix(trainConfusionMatrix, classes=classesTextList, normalize=True,
+                              title="")
         plt.legend()
         plt.show()
