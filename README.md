@@ -19,10 +19,15 @@ This is the project of hybrid prediction based on deep learning technology.
 |----|----|----|
 | Classification Accuracy(~60 epoch) | ~99.86% | ~70% |
 
+## Confusion matrix
+
++ On train data ![Confusion matrix on train data](./train_classification_confusion_matrix.svg)
++ On test data ![Confusion matrix on test data](./classification_confusion_matrix.svg)
+
+
 ## Current difficulty
 
-+ accuracy is not guaranteed
-+ generality is not satisfied
++ Follow Fast-RCNN architecture to design brand-new model
 
 ## LICENCE
 
