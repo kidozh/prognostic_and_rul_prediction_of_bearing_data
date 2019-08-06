@@ -33,6 +33,9 @@ Since they are not intuitive, we didn't publish them on **README.md** file.
 + On train data <br/> ![Confusion matrix on train data](./train_classification_confusion_matrix.svg)
 + On test data  <br/> ![Confusion matrix on test data](./classification_confusion_matrix.svg)
 
+## Train online
+
+You may use Baidu **AI Studio** to train this model by yourself. [\[HERE\]](https://aistudio.baidu.com/aistudio/projectDetail/101595) is the project hosted on **AI studio**.
 
 
 ## Current difficulty
