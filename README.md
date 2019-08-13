@@ -36,7 +36,9 @@ Since they are not intuitive, we didn't publish them on **README.md** file.
 
 ## Train online
 
-You may use Baidu **AI Studio** to train this model by yourself. [\[HERE\]](https://aistudio.baidu.com/aistudio/projectDetail/101595) is the project hosted on **AI studio**.
+**AI studio seems to support only PaddlePaddle framework which is very poor and unfriendly in supporting 1D signal. It will waste a lot of time, so we don't suggest you to use that even they are free.**
+
+<del>You may use Baidu **AI Studio** to train this model by yourself. [\[HERE\]](https://aistudio.baidu.com/aistudio/projectDetail/101595) is the project hosted on **AI studio**.</del>
 
 
 ## Current difficulty
